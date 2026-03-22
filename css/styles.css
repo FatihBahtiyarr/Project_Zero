@@ -1,11 +1,18 @@
-/* ===== Incident Zero — Core Styles ===== */
+/* ===== Incident Zero — Core Styles (V2) ===== */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+body { font-family: 'IBM Plex Mono', monospace; }
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
 
 /* Screen Management */
 .screen {
     display: none;
     position: fixed;
     inset: 0;
-    overflow-y: auto;
 }
 .screen.active {
     display: block;
@@ -13,76 +20,49 @@
 
 /* Transitions */
 .screen-fade-in {
-    animation: screenFade 0.3s ease-out;
+    animation: screenFade 0.2s ease-out;
 }
 @keyframes screenFade {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: scale(0.99); }
+    to   { opacity: 1; transform: scale(1); }
 }
 
-/* CRT / Scanline */
-.scanline {
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    background-size: 100% 4px, 3px 100%;
-    pointer-events: none;
-}
-.crt-glow { text-shadow: 0 0 10px rgba(161, 250, 255, 0.8), 0 0 20px rgba(161, 250, 255, 0.3); }
+/* Custom Scrollbar for terminal feel */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #0e0e0e; }
+::-webkit-scrollbar-thumb { background: #353535; }
+::-webkit-scrollbar-thumb:hover { background: #ff6600; }
+
+.terminal-glow { text-shadow: 0 0 10px rgba(255, 102, 0, 0.3); }
+.success-glow { text-shadow: 0 0 15px rgba(0, 204, 68, 0.4); }
+.glitch-text { text-shadow: 1px 0px 0px #ff6600, -1px 0px 0px #ffb596; }
 .error-glow { text-shadow: 0 0 12px rgba(255, 113, 108, 0.9); }
-.terminal-glow { text-shadow: 0 0 5px rgba(161, 250, 255, 0.5); }
-.crt-flicker { animation: flicker 0.15s infinite; }
-@keyframes flicker {
-    0%   { opacity: 0.97; }
-    50%  { opacity: 1; }
-    100% { opacity: 0.98; }
+
+.crt-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+    background-size: 100% 3px, 3px 100%; pointer-events: none; z-index: 100;
+}
+.scanline {
+    width: 100%; height: 100px; z-index: 10;
+    background: linear-gradient(0deg, rgba(255, 102, 0, 0.03) 0%, rgba(255, 102, 0, 0) 100%);
+    position: absolute; pointer-events: none;
+    animation: scanline 8s linear infinite;
+}
+@keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+.locked-overlay {
+    background-image: repeating-linear-gradient(45deg, #111 0, #111 2px, transparent 0, transparent 50%);
+    background-size: 10px 10px;
 }
 
-/* Server room lights bg */
-.server-lights {
-    background-image: radial-gradient(circle, #00fd87 1px, transparent 1px),
-                       radial-gradient(circle, #ff716c 1px, transparent 1px);
-    background-size: 24px 24px;
-    background-position: 0 0, 12px 12px;
-}
+#terminal-input:focus { outline: none !important; box-shadow: none !important; }
 
-/* Glass panel */
-.glass-panel {
-    backdrop-filter: blur(12px);
-    background: rgba(21, 25, 37, 0.7);
-}
-
-/* Glow helpers */
-.glow-text-gold { text-shadow: 0 0 15px rgba(255, 170, 0, 0.6); }
-.glow-border-primary { box-shadow: 0 0 15px rgba(0, 244, 254, 0.3); }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #444852; }
-::-webkit-scrollbar-thumb:hover { background: #a1faff; }
-
-/* Terminal input */
-#terminal-input:focus { box-shadow: none !important; outline: none !important; }
-
-/* Alert animation */
 .alert-enter { animation: alertSlideIn 0.3s ease-out; }
 @keyframes alertSlideIn {
     from { opacity: 0; transform: translateX(20px); }
     to   { opacity: 1; transform: translateX(0); }
-}
-
-/* Pulse */
-.pulse-critical { animation: pulseCritical 2s infinite; }
-@keyframes pulseCritical {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.6; }
-}
-
-/* Exit confirm overlay */
-.exit-overlay {
-    animation: overlayFade 0.2s ease-out;
-}
-@keyframes overlayFade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
 }
