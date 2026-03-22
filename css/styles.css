@@ -1,0 +1,88 @@
+/* ===== Incident Zero — Core Styles ===== */
+
+/* Screen Management */
+.screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+}
+.screen.active {
+    display: block;
+}
+
+/* Transitions */
+.screen-fade-in {
+    animation: screenFade 0.3s ease-out;
+}
+@keyframes screenFade {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* CRT / Scanline */
+.scanline {
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+}
+.crt-glow { text-shadow: 0 0 10px rgba(161, 250, 255, 0.8), 0 0 20px rgba(161, 250, 255, 0.3); }
+.error-glow { text-shadow: 0 0 12px rgba(255, 113, 108, 0.9); }
+.terminal-glow { text-shadow: 0 0 5px rgba(161, 250, 255, 0.5); }
+.crt-flicker { animation: flicker 0.15s infinite; }
+@keyframes flicker {
+    0%   { opacity: 0.97; }
+    50%  { opacity: 1; }
+    100% { opacity: 0.98; }
+}
+
+/* Server room lights bg */
+.server-lights {
+    background-image: radial-gradient(circle, #00fd87 1px, transparent 1px),
+                       radial-gradient(circle, #ff716c 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0, 12px 12px;
+}
+
+/* Glass panel */
+.glass-panel {
+    backdrop-filter: blur(12px);
+    background: rgba(21, 25, 37, 0.7);
+}
+
+/* Glow helpers */
+.glow-text-gold { text-shadow: 0 0 15px rgba(255, 170, 0, 0.6); }
+.glow-border-primary { box-shadow: 0 0 15px rgba(0, 244, 254, 0.3); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #444852; }
+::-webkit-scrollbar-thumb:hover { background: #a1faff; }
+
+/* Terminal input */
+#terminal-input:focus { box-shadow: none !important; outline: none !important; }
+
+/* Alert animation */
+.alert-enter { animation: alertSlideIn 0.3s ease-out; }
+@keyframes alertSlideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Pulse */
+.pulse-critical { animation: pulseCritical 2s infinite; }
+@keyframes pulseCritical {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.6; }
+}
+
+/* Exit confirm overlay */
+.exit-overlay {
+    animation: overlayFade 0.2s ease-out;
+}
+@keyframes overlayFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Incident Zero — DevOps Crisis Simulator</title>
+    <meta name="description" content="Master Kubernetes incident response through realistic crisis simulations. Free & Enterprise editions." />
+    <meta property="og:title" content="Incident Zero — DevOps Crisis Simulator" />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#0a0e17" />
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface-variant": "#a7abb7",
+                        "tertiary-dim": "#e2242a",
+                        "surface-variant": "#202633",
+                        "background": "#0a0e17",
+                        "tertiary-fixed-dim": "#ff7b71",
+                        "outline": "#727581",
+                        "surface-container-highest": "#202633",
+                        "outline-variant": "#444852",
+                        "on-error-container": "#ffa8a3",
+                        "primary-fixed": "#00f4fe",
+                        "tertiary": "#ff7168",
+                        "on-primary-container": "#00575b",
+                        "error": "#ff716c",
+                        "surface-container-high": "#1a1f2c",
+                        "surface-tint": "#a1faff",
+                        "error-dim": "#d7383b",
+                        "on-secondary-fixed-variant": "#006632",
+                        "on-primary": "#006165",
+                        "primary": "#a1faff",
+                        "inverse-surface": "#faf9ff",
+                        "on-surface": "#ebedfb",
+                        "on-secondary-container": "#e3ffe4",
+                        "secondary-fixed-dim": "#00ed7e",
+                        "surface-bright": "#262c3a",
+                        "on-error": "#490006",
+                        "primary-dim": "#00e5ee",
+                        "on-tertiary": "#4a0004",
+                        "on-tertiary-fixed": "#3a0002",
+                        "on-secondary": "#005b2c",
+                        "tertiary-container": "#f53335",
+                        "on-primary-fixed": "#004346",
+                        "primary-container": "#00f4fe",
+                        "on-background": "#ebedfb",
+                        "surface-container-low": "#0f131d",
+                        "surface-container": "#151925",
+                        "primary-fixed-dim": "#00e5ee",
+                        "tertiary-fixed": "#ff9289",
+                        "secondary-fixed": "#00fd87",
+                        "error-container": "#9f0519",
+                        "surface": "#0a0e17",
+                        "on-secondary-fixed": "#004621",
+                        "surface-container-lowest": "#000000",
+                        "on-primary-fixed-variant": "#006266",
+                        "inverse-primary": "#006a6e",
+                        "on-tertiary-container": "#000000",
+                        "secondary-container": "#006d37",
+                        "on-tertiary-fixed-variant": "#7a000b",
+                        "secondary-dim": "#00ed7e",
+                        "inverse-on-surface": "#515560",
+                        "surface-dim": "#0a0e17",
+                        "secondary": "#00fd87"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: { "DEFAULT": "0rem", "lg": "0rem", "xl": "0rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary selection:text-on-primary overflow-hidden h-screen">
+
+    <!-- Global Scanline Overlay -->
+    <div class="fixed inset-0 z-[100] scanline opacity-20 pointer-events-none"></div>
+
+    <!-- ==================== SCREEN: MAIN MENU ==================== -->
+    <div id="screen-menu" class="screen active">
+        <!-- Cinematic Background -->
+        <div class="fixed inset-0 z-0 bg-surface">
+            <div class="absolute inset-0 bg-cover bg-center opacity-20 grayscale brightness-50" style="background-image: url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2000')"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/80 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-error/5"></div>
+            <div class="absolute inset-0 server-lights opacity-10"></div>
+            <!-- HUD Corners -->
+            <div class="absolute top-8 left-8 w-16 h-16 border-t border-l border-primary/40"></div>
+            <div class="absolute top-8 right-8 w-16 h-16 border-t border-r border-primary/40"></div>
+            <div class="absolute bottom-8 left-8 w-16 h-16 border-b border-l border-primary/40"></div>
+            <div class="absolute bottom-8 right-8 w-16 h-16 border-b border-r border-primary/40"></div>
+        </div>
+
+        <!-- Header -->
+        <header class="fixed top-0 w-full border-b-2 border-primary/15 bg-surface flex justify-between items-center px-6 h-16 z-50 shadow-[0_0_15px_rgba(0,245,255,0.1)]">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-primary/20 border border-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">crisis_alert</span>
+                </div>
+                <span class="text-xl font-bold text-primary drop-shadow-[0_0_8px_rgba(0,245,255,0.8)] font-headline tracking-widest uppercase">
+                    Incident Zero
+                </span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="bg-secondary/10 border border-secondary/40 text-secondary px-3 py-1 font-mono text-[10px] tracking-wider">COMMUNITY EDITION</div>
+                <div class="bg-primary/20 border border-primary text-primary px-3 py-1 font-mono text-xs tracking-tighter">SYSTEM_READY</div>
+            </div>
+        </header>
+
+        <!-- Hero Content -->
+        <main class="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-20">
+            <div class="text-center mb-16 space-y-2">
+                <div class="inline-block px-3 py-1 mb-4 border border-secondary/30 bg-secondary/5 text-secondary font-mono text-[10px] tracking-[0.2em]">
+                    SYSTEM_STATUS: NOMINAL // ESTABLISHING HANDSHAKE
+                </div>
+                <div class="relative mb-6">
+                    <div class="absolute inset-0 flex items-center justify-center"><div class="w-32 h-32 bg-primary/5 blur-[60px] rounded-full"></div></div>
+                    <div class="relative w-24 h-24 mx-auto mb-6 border-2 border-primary/30 rotate-45 flex items-center justify-center bg-surface-container/50 backdrop-blur-sm">
+                        <span class="material-symbols-outlined text-primary text-4xl -rotate-45" style="font-variation-settings: 'FILL' 1;">crisis_alert</span>
+                    </div>
+                </div>
+                <h1 class="text-6xl md:text-8xl font-headline font-bold text-primary tracking-tighter crt-glow uppercase">
+                    Incident Zero
+                </h1>
+                <div class="relative py-4 flex items-center justify-center">
+                    <div class="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+                    <div class="absolute w-2 h-2 bg-primary rotate-45"></div>
+                </div>
+                <p class="text-lg md:text-xl font-body text-on-surface-variant tracking-wider">DevOps Crisis Simulator</p>
+                <p class="text-sm font-mono text-on-surface-variant/50 mt-2">Master incident response. Protect the infrastructure.</p>
+            </div>
+
+            <!-- Menu Buttons -->
+            <div class="w-full max-w-sm space-y-3">
+                <button onclick="navigateTo('scenarios')" class="group w-full relative flex items-center justify-between px-6 py-4 bg-primary-container/10 border-t-2 border-primary-container hover:bg-primary-container/20 transition-all duration-150">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">sports_esports</span>
+                        <span class="font-headline font-bold text-lg tracking-wider text-on-surface uppercase">New Game</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-mono text-[10px] text-primary/50">LNK-01</span>
+                        <span class="material-symbols-outlined text-primary text-sm">chevron_right</span>
+                    </div>
+                </button>
+
+                <button onclick="navigateTo('scenarios')" class="group w-full flex items-center justify-between px-6 py-4 bg-surface-container/40 border border-outline-variant/30 hover:border-primary/50 hover:bg-surface-container-high/60 transition-all duration-100">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">inventory_2</span>
+                        <span class="font-label text-sm font-medium tracking-widest text-on-surface-variant uppercase group-hover:text-on-surface">Select Scenario</span>
+                    </div>
+                    <span class="font-mono text-[10px] text-on-surface-variant/30">CMD_LOAD</span>
+                </button>
+
+                <button class="group w-full flex items-center justify-between px-6 py-4 bg-surface-container/40 border border-outline-variant/30 hover:border-primary/50 hover:bg-surface-container-high/60 transition-all duration-100">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">leaderboard</span>
+                        <span class="font-label text-sm font-medium tracking-widest text-on-surface-variant uppercase group-hover:text-on-surface">Leaderboard</span>
+                    </div>
+                    <span class="font-mono text-[10px] text-on-surface-variant/30">RNK_STAT</span>
+                </button>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="navigateTo('settings')" class="group flex items-center justify-center gap-3 px-4 py-4 bg-surface-container/40 border border-outline-variant/30 hover:border-primary/50 transition-all duration-100">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary text-sm">settings</span>
+                        <span class="font-label text-xs font-medium tracking-widest text-on-surface-variant uppercase group-hover:text-on-surface">Settings</span>
+                    </button>
+                    <button class="group flex items-center justify-center gap-3 px-4 py-4 bg-surface-container/40 border border-outline-variant/30 hover:border-primary/50 transition-all duration-100">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary text-sm">menu_book</span>
+                        <span class="font-label text-xs font-medium tracking-widest text-on-surface-variant uppercase group-hover:text-on-surface">Manual</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Telemetry -->
+            <div class="mt-20 grid grid-cols-3 gap-8 w-full max-w-4xl border-t border-outline-variant/20 pt-8 opacity-40">
+                <div class="space-y-1">
+                    <div class="font-mono text-[10px] text-primary">SCENARIOS_LOADED</div>
+                    <div class="font-mono text-xl text-on-surface" id="menu-scenario-count">2</div>
+                </div>
+                <div class="space-y-1">
+                    <div class="font-mono text-[10px] text-error">INCIDENTS_RESOLVED</div>
+                    <div class="font-mono text-xl text-on-surface" id="menu-resolved-count">0</div>
+                </div>
+                <div class="space-y-1">
+                    <div class="font-mono text-[10px] text-secondary">BEST_RANK</div>
+                    <div class="font-mono text-xl text-on-surface" id="menu-best-rank">---</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="fixed bottom-0 left-0 w-full z-50 h-12 bg-surface border-t-2 border-primary/20 flex items-center justify-between px-6">
+            <span class="font-mono text-[10px] text-on-surface-variant/40 tracking-widest uppercase">v0.1.0-alpha // Community Edition</span>
+            <span class="font-mono text-[10px] text-on-surface-variant/30 tracking-wider">Incident Zero © 2026</span>
+        </footer>
+    </div>
+
+    <!-- ==================== SCREEN: SCENARIO SELECTION ==================== -->
+    <div id="screen-scenarios" class="screen">
+        <header class="fixed top-0 w-full border-b-2 border-primary/15 bg-surface shadow-[0_0_15px_rgba(0,245,255,0.1)] flex justify-between items-center px-6 h-16 z-50">
+            <div class="flex items-center gap-4">
+                <button onclick="navigateTo('menu')" class="flex items-center justify-center w-10 h-10 hover:bg-primary/10 transition-all duration-100 active:scale-95">
+                    <span class="material-symbols-outlined text-primary">arrow_back</span>
+                </button>
+                <div class="flex items-center gap-3">
+                    <div class="w-6 h-6 bg-primary/20 border border-primary/40 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">crisis_alert</span>
+                    </div>
+                    <h1 class="text-xl font-headline font-bold text-primary drop-shadow-[0_0_8px_rgba(0,245,255,0.8)] tracking-widest uppercase">
+                        SELECT SCENARIO
+                    </h1>
+                </div>
+            </div>
+            <div class="hidden md:flex gap-6 items-center">
+                <div class="flex flex-col items-end">
+                    <span class="font-mono text-[10px] text-on-surface-variant leading-none tracking-widest uppercase">OPERATOR_ID</span>
+                    <span class="font-headline font-bold text-primary">OPERATOR_01</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="pt-24 pb-20 px-6 lg:px-12 min-h-screen relative overflow-y-auto">
+            <div class="absolute top-20 right-0 w-96 h-96 bg-primary/5 blur-[120px] rounded-full -z-10"></div>
+
+            <!-- Section: Community Scenarios -->
+            <div class="max-w-6xl mx-auto mb-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-secondary">lock_open</span>
+                    <h2 class="font-headline font-bold text-lg text-secondary tracking-widest uppercase">Community Scenarios</h2>
+                    <div class="flex-1 h-px bg-secondary/20"></div>
+                </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <!-- Card 1: Pod CrashLoopBackOff -->
+                <div onclick="startScenario('pod_crash')" class="group relative glass-panel border border-outline-variant hover:border-secondary/50 hover:-translate-y-1 transition-all duration-150 p-6 flex flex-col gap-4 cursor-pointer shadow-[0_0_15px_rgba(0,253,135,0.05)] hover:shadow-[0_0_25px_rgba(0,253,135,0.15)]">
+                    <div class="flex justify-between items-start">
+                        <div class="p-3 bg-secondary/10 border border-secondary/20">
+                            <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">view_in_ar</span>
+                        </div>
+                        <span class="px-3 py-1 bg-secondary/20 text-secondary font-headline text-[10px] font-bold tracking-widest border-l-2 border-secondary">EASY</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface mb-1">Pod CrashLoopBackOff</h3>
+                        <p class="text-on-surface-variant text-sm line-clamp-1">Stabilize the main API pod and investigate container exit codes.</p>
+                    </div>
+                    <div class="flex items-center gap-4 py-2 border-y border-outline-variant/30 font-mono text-[11px] text-on-surface/70">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">timer</span> 10 min</span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-amber-400" style="font-variation-settings: 'FILL' 1;">star</span> Best: ---</span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-primary">emoji_events</span> 0 stars</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <span class="material-symbols-outlined text-on-surface-variant/30">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/30">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/30">star</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: PVC Disk Full -->
+                <div onclick="startScenario('pvc_full')" class="group relative glass-panel border border-outline-variant hover:border-secondary/50 hover:-translate-y-1 transition-all duration-150 p-6 flex flex-col gap-4 cursor-pointer shadow-[0_0_15px_rgba(0,253,135,0.05)] hover:shadow-[0_0_25px_rgba(0,253,135,0.15)]">
+                    <div class="flex justify-between items-start">
+                        <div class="p-3 bg-secondary/10 border border-secondary/20">
+                            <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">database</span>
+                        </div>
+                        <span class="px-3 py-1 bg-secondary/20 text-secondary font-headline text-[10px] font-bold tracking-widest border-l-2 border-secondary">EASY</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface mb-1">PVC Disk Full</h3>
+                        <p class="text-on-surface-variant text-sm line-clamp-1">Emergency volume expansion required for the logging partition.</p>
+                    </div>
+                    <div class="flex items-center gap-4 py-2 border-y border-outline-variant/30 font-mono text-[11px] text-on-surface/70">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">timer</span> 12 min</span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-amber-400" style="font-variation-settings: 'FILL' 1;">star</span> Best: ---</span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-primary">emoji_events</span> 0 stars</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <span class="material-symbols-outlined text-on-surface-variant/30">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/30">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/30">star</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Service Mesh Failure (Medium) -->
+                <div class="group relative glass-panel border border-outline-variant hover:border-primary/50 hover:-translate-y-1 transition-all duration-150 p-6 flex flex-col gap-4 cursor-pointer shadow-[0_0_15px_rgba(161,250,255,0.05)] hover:shadow-[0_0_25px_rgba(161,250,255,0.15)]">
+                    <div class="flex justify-between items-start">
+                        <div class="p-3 bg-primary/10 border border-primary/20">
+                            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">hub</span>
+                        </div>
+                        <span class="px-3 py-1 bg-primary/20 text-primary font-headline text-[10px] font-bold tracking-widest border-l-2 border-primary">MEDIUM</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface mb-1">Service Mesh Failure</h3>
+                        <p class="text-on-surface-variant text-sm line-clamp-1">Istio control plane is flapping. Traffic routing is non-deterministic.</p>
+                    </div>
+                    <div class="flex items-center gap-4 py-2 border-y border-outline-variant/30 font-mono text-[11px] text-on-surface/70">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">timer</span> 20 min</span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-on-surface-variant/50">star</span> Best: ---</span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm text-primary">emoji_events</span> 0 stars</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <span class="material-symbols-outlined text-on-surface-variant/30">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/30">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/30">star</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: Database Replication Lag (LOCKED) -->
+                <div class="relative bg-surface-container-low border border-outline-variant/30 p-6 flex flex-col gap-4 overflow-hidden grayscale opacity-60">
+                    <div class="absolute inset-0 flex items-center justify-center bg-surface-container-lowest/40 backdrop-blur-[2px] z-10">
+                        <span class="material-symbols-outlined text-4xl text-on-surface-variant/50">lock</span>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div class="p-3 bg-outline-variant/20 border border-outline-variant/30">
+                            <span class="material-symbols-outlined text-on-surface-variant">storage</span>
+                        </div>
+                        <span class="px-3 py-1 bg-primary/10 text-primary/60 font-headline text-[10px] font-bold tracking-widest border-l-2 border-primary/40">MEDIUM</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface mb-1">Database Replication Lag</h3>
+                        <p class="text-on-surface-variant text-sm line-clamp-1">Sync between primary and standby has drifted by 300 seconds.</p>
+                    </div>
+                    <div class="flex items-center gap-4 py-2 border-y border-outline-variant/30 font-mono text-[11px]">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">timer</span> 15 min</span>
+                        <span>LOCKED</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <span class="material-symbols-outlined text-on-surface-variant/20">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/20">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/20">star</span>
+                    </div>
+                </div>
+
+                <!-- Card 5: Ingress Controller Down (LOCKED) -->
+                <div class="relative bg-surface-container-low border border-outline-variant/30 p-6 flex flex-col gap-4 overflow-hidden grayscale opacity-60">
+                    <div class="absolute inset-0 flex items-center justify-center bg-surface-container-lowest/40 backdrop-blur-[2px] z-10">
+                        <span class="material-symbols-outlined text-4xl text-on-surface-variant/50">lock</span>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div class="p-3 bg-outline-variant/20 border border-outline-variant/30">
+                            <span class="material-symbols-outlined text-on-surface-variant">router</span>
+                        </div>
+                        <span class="px-3 py-1 bg-primary/10 text-primary/60 font-headline text-[10px] font-bold tracking-widest border-l-2 border-primary/40">MEDIUM</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface mb-1">Ingress Controller Down</h3>
+                        <p class="text-on-surface-variant text-sm line-clamp-1">NGINX ingress is 503ing across all production namespaces.</p>
+                    </div>
+                    <div class="flex items-center gap-4 py-2 border-y border-outline-variant/30 font-mono text-[11px]">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">timer</span> 18 min</span>
+                        <span>LOCKED</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <span class="material-symbols-outlined text-on-surface-variant/20">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/20">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/20">star</span>
+                    </div>
+                </div>
+
+                <!-- Card 6: Full Node Failure (LOCKED) -->
+                <div class="relative bg-surface-container-low border border-outline-variant/30 p-6 flex flex-col gap-4 overflow-hidden grayscale opacity-60">
+                    <div class="absolute inset-0 flex items-center justify-center bg-surface-container-lowest/40 backdrop-blur-[2px] z-10">
+                        <span class="material-symbols-outlined text-4xl text-on-surface-variant/50">lock</span>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div class="p-3 bg-outline-variant/20 border border-outline-variant/30">
+                            <span class="material-symbols-outlined text-on-surface-variant">dns</span>
+                        </div>
+                        <span class="px-3 py-1 bg-error/10 text-error/60 font-headline text-[10px] font-bold tracking-widest border-l-2 border-error/40">HARD</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface mb-1">Full Node Failure</h3>
+                        <p class="text-on-surface-variant text-sm line-clamp-1">Hardware outage in US-EAST-1a. Drain and relocate workloads.</p>
+                    </div>
+                    <div class="flex items-center gap-4 py-2 border-y border-outline-variant/30 font-mono text-[11px]">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">timer</span> 25 min</span>
+                        <span>LOCKED</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <span class="material-symbols-outlined text-on-surface-variant/20">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/20">star</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/20">star</span>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Section: Enterprise Scenarios -->
+            <div class="max-w-6xl mx-auto mt-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-tertiary">verified</span>
+                    <h2 class="font-headline font-bold text-lg text-tertiary tracking-widest uppercase">Enterprise Scenarios</h2>
+                    <div class="flex-1 h-px bg-tertiary/20"></div>
+                    <span class="px-3 py-1 bg-tertiary/10 border border-tertiary/30 text-tertiary text-[10px] font-mono tracking-wider">COMING SOON</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="relative bg-surface-container-low border border-outline-variant/30 p-6 flex flex-col gap-4 overflow-hidden grayscale opacity-50">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center bg-surface-container-lowest/40 backdrop-blur-[2px] z-10 gap-2">
+                            <span class="material-symbols-outlined text-3xl text-tertiary/60">verified</span>
+                            <span class="font-mono text-[10px] text-tertiary/80 tracking-widest">ENTERPRISE ONLY</span>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div class="p-3 bg-outline-variant/20 border border-outline-variant/30"><span class="material-symbols-outlined text-on-surface-variant">storage</span></div>
+                            <span class="px-3 py-1 bg-primary/10 text-primary/60 font-headline text-[10px] font-bold tracking-widest border-l-2 border-primary/40">MEDIUM</span>
+                        </div>
+                        <div>
+                            <h3 class="font-headline font-bold text-xl text-on-surface mb-1">Custom Infrastructure Drill</h3>
+                            <p class="text-on-surface-variant text-sm">Scenarios tailored to your organization's Kubernetes stack.</p>
+                        </div>
+                        <div class="flex items-center gap-4 py-2 border-y border-outline-variant/30 font-mono text-[11px]"><span>Custom Duration</span><span>Org-specific</span></div>
+                    </div>
+                    <div class="relative bg-surface-container-low border border-outline-variant/30 p-6 flex flex-col gap-4 overflow-hidden grayscale opacity-50">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center bg-surface-container-lowest/40 backdrop-blur-[2px] z-10 gap-2">
+                            <span class="material-symbols-outlined text-3xl text-tertiary/60">verified</span>
+                            <span class="font-mono text-[10px] text-tertiary/80 tracking-widest">ENTERPRISE ONLY</span>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div class="p-3 bg-outline-variant/20 border border-outline-variant/30"><span class="material-symbols-outlined text-on-surface-variant">security</span></div>
+                            <span class="px-3 py-1 bg-error/10 text-error/60 font-headline text-[10px] font-bold tracking-widest border-l-2 border-error/40">HARD</span>
+                        </div>
+                        <div>
+                            <h3 class="font-headline font-bold text-xl text-on-surface mb-1">Compliance & DR Testing</h3>
+                            <p class="text-on-surface-variant text-sm">Disaster recovery drills meeting regulatory requirements.</p>
+                        </div>
+                        <div class="flex items-center gap-4 py-2 border-y border-outline-variant/30 font-mono text-[11px]"><span>Audit-Ready</span><span>SOC2 / ISO 27001</span></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== SCREEN: GAME ==================== -->
+    <div id="screen-game" class="screen">
+        <!-- Dot Grid Background -->
+        <div class="fixed inset-0 pointer-events-none opacity-[0.03] z-[5]" style="background-image: radial-gradient(#a1faff 1px, transparent 1px); background-size: 20px 20px;"></div>
+
+        <!-- Game Header -->
+        <header class="bg-surface text-primary font-headline tracking-widest uppercase fixed top-0 w-full border-b-2 border-primary/15 shadow-[0_0_15px_rgba(0,245,255,0.1)] flex justify-between items-center px-6 h-16 z-50">
+            <div class="flex items-center gap-4">
+                <button onclick="confirmExit()" class="flex items-center justify-center w-8 h-8 hover:bg-error/10 transition-all active:scale-95 border border-transparent hover:border-error/30">
+                    <span class="material-symbols-outlined text-error text-lg">close</span>
+                </button>
+                <span class="material-symbols-outlined text-error animate-pulse text-2xl" style="font-variation-settings: 'FILL' 1;">crisis_alert</span>
+                <h1 class="text-lg font-bold text-primary drop-shadow-[0_0_8px_rgba(0,245,255,0.8)]">INCIDENT ZERO</h1>
+            </div>
+            <div class="hidden md:flex items-center bg-surface-container-high px-6 py-2 border-x border-outline-variant/30">
+                <span class="text-xs text-on-surface-variant mr-3">ACTIVE_ENGAGEMENT:</span>
+                <span class="font-bold tracking-normal text-primary" id="game-mission-name">Mission: Payment Service Down</span>
+            </div>
+            <div class="flex items-center gap-8">
+                <div class="flex flex-col items-end">
+                    <span class="text-[10px] text-on-surface-variant">SCORE</span>
+                    <span class="font-mono text-lg text-primary" id="game-score">0</span>
+                </div>
+                <div class="flex flex-col items-center bg-error-container/20 px-4 py-1 border border-error/30 shadow-[0_0_10px_rgba(255,113,108,0.2)]">
+                    <span class="text-[10px] text-error">TIME_REMAINING</span>
+                    <span class="font-mono text-xl text-error font-bold crt-flicker" id="game-timer">10:00</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex flex-1 mt-16 mb-16 overflow-hidden h-[calc(100vh-128px)]">
+            <!-- Left Panel: System Status -->
+            <aside class="w-[20%] bg-surface/80 backdrop-blur-xl border-r border-primary/15 flex flex-col font-mono text-xs p-6 overflow-y-auto">
+                <div class="flex items-center gap-2 mb-8 border-b border-outline-variant/20 pb-2">
+                    <span class="material-symbols-outlined text-primary">monitor</span>
+                    <span class="text-sm font-bold tracking-widest uppercase font-headline">SYSTEM STATUS</span>
+                </div>
+                <div class="space-y-6" id="system-metrics">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <span class="text-on-surface-variant">CPU_LOAD</span>
+                            <span class="text-amber-400" id="metric-cpu-val">82%</span>
+                        </div>
+                        <div class="h-1.5 bg-surface-variant w-full">
+                            <div class="h-full bg-amber-400 shadow-[0_0_8px_#ffaa00] transition-all duration-500" id="metric-cpu-bar" style="width: 82%"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <span class="text-on-surface-variant">MEM_ALLOC</span>
+                            <span class="text-amber-400" id="metric-mem-val">64%</span>
+                        </div>
+                        <div class="h-1.5 bg-surface-variant w-full">
+                            <div class="h-full bg-amber-400 shadow-[0_0_8px_#ffaa00] transition-all duration-500" id="metric-mem-bar" style="width: 64%"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <span class="text-on-surface-variant">DISK_IO</span>
+                            <span class="text-error" id="metric-disk-val">94%</span>
+                        </div>
+                        <div class="h-1.5 bg-surface-variant w-full">
+                            <div class="h-full bg-error shadow-[0_0_8px_#ff716c] transition-all duration-500" id="metric-disk-bar" style="width: 94%"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <span class="text-on-surface-variant">NET_TRAFFIC</span>
+                            <span class="text-secondary" id="metric-net-val">38%</span>
+                        </div>
+                        <div class="h-1.5 bg-surface-variant w-full">
+                            <div class="h-full bg-secondary shadow-[0_0_8px_#00fd87] transition-all duration-500" id="metric-net-bar" style="width: 38%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-auto pt-8 border-t border-outline-variant/20 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-on-surface-variant">POD_STATUS</span>
+                        <span class="flex items-center gap-2" id="pod-status-text">
+                            12/15
+                            <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_4px_#00fd87]"></span>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-on-surface-variant">NODE_AVAIL</span>
+                        <span class="flex items-center gap-2">
+                            3/3 Ready
+                            <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_4px_#00fd87]"></span>
+                        </span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center: Terminal -->
+            <section class="w-[55%] relative flex flex-col bg-surface-container-lowest border-r border-outline-variant/20">
+                <div class="absolute inset-0 scanline z-10 pointer-events-none opacity-20"></div>
+                <!-- Terminal Title Bar -->
+                <div class="flex items-center bg-surface-variant px-4 py-1 gap-2 border-b border-outline-variant/30">
+                    <div class="flex gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-amber-400/40"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-secondary/40"></div>
+                    </div>
+                    <span class="text-[10px] font-mono text-on-surface-variant ml-4 uppercase tracking-widest">Console — root@bank-ops: ~</span>
+                </div>
+                <!-- Terminal Content -->
+                <div class="flex-1 p-6 font-mono text-sm overflow-y-auto space-y-1 text-on-surface/90 relative z-20" id="terminal-output">
+                    <p class="text-primary/60">Welcome to DevOps Simulator: Outage Crisis v1.0</p>
+                    <p class="text-primary/60">Type commands to investigate and resolve the incident.</p>
+                    <p class="text-primary/60">Type <span class="text-secondary">'help'</span> for available commands.</p>
+                    <p class="text-primary/40">─────────────────────────────────────────────────</p>
+                </div>
+                <!-- Terminal Input -->
+                <div class="flex items-center gap-2 px-6 py-3 border-t border-outline-variant/30 bg-surface-container-lowest relative z-20">
+                    <span class="text-secondary font-mono font-bold text-sm">root@bank-ops:~$</span>
+                    <input type="text" id="terminal-input" class="flex-1 bg-transparent border-none outline-none font-mono text-sm text-on-surface focus:ring-0 placeholder-on-surface-variant/30" placeholder="Type a command..." autocomplete="off" spellcheck="false" />
+                </div>
+            </section>
+
+            <!-- Right Panel: Alerts -->
+            <aside class="w-[25%] flex flex-col p-6 bg-surface-container-low overflow-y-auto">
+                <div class="flex items-center gap-2 mb-6 border-b border-outline-variant/20 pb-2">
+                    <span class="material-symbols-outlined text-primary">notifications</span>
+                    <span class="text-sm font-headline font-bold tracking-widest uppercase">LIVE ALERTS</span>
+                </div>
+                <div class="flex-1 space-y-4 overflow-y-auto pr-2" id="alerts-panel">
+                    <!-- Alerts will be injected by JS -->
+                </div>
+            </aside>
+        </main>
+
+        <!-- Game Footer -->
+        <footer class="bg-surface fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 border-t-2 border-primary/20 shadow-[0_-4px_20px_rgba(0,245,255,0.15)] px-8 font-mono text-[10px] uppercase tracking-tighter">
+            <div class="flex items-center gap-3 w-1/4">
+                <span class="material-symbols-outlined text-primary text-xl">target</span>
+                <div class="flex flex-col">
+                    <span class="text-on-surface-variant">OBJECTIVE</span>
+                    <span class="text-white normal-case tracking-normal text-[11px]" id="game-objective">Restore payment-svc within SLA deadline</span>
+                </div>
+            </div>
+            <div class="flex flex-col items-center justify-center w-1/2 px-12">
+                <div class="flex justify-between w-full mb-1">
+                    <span class="text-on-surface-variant">SLA_METER: <span class="text-primary" id="sla-value">100.0%</span></span>
+                    <span class="text-on-surface-variant">TARGET: <span class="text-secondary">99.9%</span></span>
+                </div>
+                <div class="w-full h-2 bg-surface-variant relative overflow-hidden">
+                    <div class="h-full bg-primary shadow-[0_0_10px_#a1faff] transition-all duration-500" id="sla-bar" style="width: 100%"></div>
+                    <div class="absolute left-[99.9%] top-0 bottom-0 w-px bg-secondary shadow-[0_0_5px_#00fd87]"></div>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-3 w-1/4">
+                <div class="flex flex-col items-end">
+                    <span class="text-on-surface-variant">IMPACT_ASSESSMENT</span>
+                    <span class="text-error font-bold text-[12px] tracking-normal" id="impact-text">👥 0 CUSTOMERS AFFECTED</span>
+                </div>
+                <span class="material-symbols-outlined text-error animate-bounce">warning</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ==================== SCREEN: SCORE ==================== -->
+    <div id="screen-score" class="screen">
+        <!-- Background blur -->
+        <div class="fixed inset-0 z-0 bg-surface-container-lowest/60 backdrop-blur-sm"></div>
+
+        <main class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div class="max-w-4xl w-full glass-panel border border-primary/20 relative p-8 md:p-12 overflow-hidden">
+                <!-- Accent lines -->
+                <div class="absolute top-0 left-0 w-full h-1 pointer-events-none flex justify-around">
+                    <div class="w-1 h-8 bg-secondary glow-border-primary opacity-50"></div>
+                    <div class="w-1 h-12 bg-primary opacity-30 mt-4"></div>
+                    <div class="w-1 h-6 bg-secondary-fixed opacity-40 mt-2"></div>
+                    <div class="w-1 h-10 bg-primary-container opacity-50 mt-1"></div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center">
+                    <div class="text-center mb-10">
+                        <h1 id="score-title" class="font-headline font-bold text-4xl md:text-6xl tracking-tighter text-[#ffaa00] glow-text-gold uppercase mb-2">
+                            🎉 MISSION COMPLETE!
+                        </h1>
+                        <div class="h-px w-32 bg-gradient-to-r from-transparent via-[#ffaa00] to-transparent mx-auto"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 w-full">
+                        <div class="lg:col-span-7 space-y-8">
+                            <div>
+                                <div class="flex items-center gap-3 mb-1">
+                                    <span class="text-xs font-mono text-primary/60 tracking-widest uppercase">Scenario Protocol</span>
+                                    <div id="score-difficulty" class="px-2 py-0.5 bg-secondary-container/20 border-l-2 border-secondary text-secondary text-[10px] font-mono">⭐ EASY</div>
+                                </div>
+                                <h2 id="score-scenario-name" class="font-headline font-bold text-3xl text-on-surface uppercase tracking-tight">Payment Service Recovery</h2>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-12">
+                                <div class="relative w-32 h-32 flex items-center justify-center">
+                                    <svg class="w-full h-full -rotate-90">
+                                        <circle class="text-surface-container-highest" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="4"></circle>
+                                        <circle id="score-timer-ring" class="text-primary" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-dasharray="364.4" stroke-dashoffset="109.3" stroke-width="4"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span id="score-time" class="font-mono text-lg text-primary">00:00</span>
+                                        <span id="score-time-limit" class="text-[9px] font-mono text-primary/40">/ 10:00</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <span class="text-[10px] font-mono text-primary/60 tracking-[0.2em] uppercase">Performance Rating</span>
+                                    <div class="flex gap-2" id="score-stars">
+                                        <span class="material-symbols-outlined text-4xl text-on-surface-variant/30">star</span>
+                                        <span class="material-symbols-outlined text-4xl text-on-surface-variant/30">star</span>
+                                        <span class="material-symbols-outlined text-4xl text-on-surface-variant/30">star</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Score Breakdown -->
+                            <div class="bg-surface-container-lowest/50 border border-outline-variant/10 p-6 space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-secondary text-sm">check_circle</span>
+                                        <span class="font-mono text-xs uppercase tracking-wide text-on-surface/80">Correct Commands</span>
+                                    </div>
+                                    <span class="font-mono text-secondary font-bold" id="score-correct">+0 PTS</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-primary text-sm">bolt</span>
+                                        <span class="font-mono text-xs uppercase tracking-wide text-on-surface/80">Speed Bonus</span>
+                                    </div>
+                                    <span class="font-mono text-primary font-bold" id="score-speed">+0 PTS</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-tertiary text-sm">search</span>
+                                        <span class="font-mono text-xs uppercase tracking-wide text-on-surface/80">Root Cause Analysis</span>
+                                    </div>
+                                    <span class="font-mono text-tertiary font-bold" id="score-rca">+0 PTS</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-error text-sm">explosion</span>
+                                        <span class="font-mono text-xs uppercase tracking-wide text-on-surface/80">Damage Penalty</span>
+                                    </div>
+                                    <span class="font-mono text-error font-bold" id="score-damage">-0 PTS</span>
+                                </div>
+                                <div class="pt-4 border-t border-outline-variant/20 flex justify-between items-end">
+                                    <span class="font-headline font-bold text-lg tracking-widest text-on-surface/40 uppercase">Total Score</span>
+                                    <span class="font-headline font-bold text-4xl text-[#ffaa00] glow-text-gold" id="score-total">0 PTS</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grade -->
+                        <div class="lg:col-span-5 flex flex-col items-center justify-center border-l border-outline-variant/10 pl-0 lg:pl-10 text-center">
+                            <div class="relative mb-6">
+                                <div class="absolute inset-0 bg-primary/5 blur-3xl rounded-full"></div>
+                                <div class="relative w-48 h-48 flex items-center justify-center border-4 border-primary/20 bg-surface-container-high rotate-45">
+                                    <span id="score-grade" class="font-headline font-black text-8xl text-primary -rotate-45 drop-shadow-[0_0_20px_rgba(161,250,255,0.4)]">C</span>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="text-[10px] font-mono text-primary/60 tracking-[0.3em] uppercase">Achieved Rank</span>
+                                <div id="score-rank" class="font-headline font-bold text-2xl tracking-tight text-on-surface uppercase">Junior SRE</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-4 mt-12 w-full border-t border-outline-variant/10 pt-8">
+                        <button onclick="navigateTo('scenarios')" class="w-full md:w-auto px-8 py-3 border border-outline hover:bg-on-surface/5 transition-colors font-headline font-bold text-sm tracking-widest uppercase">
+                            🔄 Retry
+                        </button>
+                        <button onclick="navigateTo('scenarios')" class="w-full md:w-auto px-10 py-3 bg-primary-container border-t-2 border-primary text-surface font-headline font-bold text-sm tracking-widest uppercase glow-border-primary hover:brightness-110 active:scale-95 transition-all">
+                            ➡️ Next Scenario
+                        </button>
+                        <button onclick="navigateTo('menu')" class="w-full md:w-auto px-8 py-3 text-on-surface/60 hover:text-on-surface transition-colors font-headline font-bold text-sm tracking-widest uppercase">
+                            🏠 Main Menu
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Decorative corners -->
+                <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary/40"></div>
+                <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary/40"></div>
+                <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary/40"></div>
+                <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary/40"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== SCREEN: SETTINGS ==================== -->
+    <div id="screen-settings" class="screen">
+        <header class="fixed top-0 left-0 right-0 z-40 bg-surface text-primary font-headline uppercase tracking-widest flex justify-between items-center w-full px-6 py-4 border-b border-primary/15">
+            <div class="flex items-center gap-4">
+                <button onclick="navigateTo('menu')" class="flex items-center justify-center w-10 h-10 hover:bg-primary/10 transition-all duration-100 active:scale-95">
+                    <span class="material-symbols-outlined text-primary">arrow_back</span>
+                </button>
+                <span class="text-xl font-bold text-primary tracking-[0.2em]">SYSTEM SETTINGS</span>
+            </div>
+        </header>
+
+        <main class="pt-24 px-8 lg:px-16 pb-12 max-w-5xl mx-auto">
+            <div class="mb-12">
+                <div class="font-mono text-xs text-secondary tracking-widest uppercase flex items-center gap-2">
+                    <span class="w-2 h-2 bg-secondary inline-block"></span>
+                    Terminal Configuration Active // Incident Zero v0.1.0
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-8">
+                <!-- Tab Nav -->
+                <aside class="col-span-12 md:col-span-3 space-y-2">
+                    <button class="w-full text-left px-4 py-4 font-headline font-bold text-primary bg-primary/10 border-l-4 border-primary flex items-center justify-between transition-all group">
+                        DISPLAY
+                        <span class="material-symbols-outlined text-sm opacity-50">chevron_right</span>
+                    </button>
+                    <button class="w-full text-left px-4 py-4 font-headline font-bold text-on-surface-variant hover:bg-surface-container-high border-l-4 border-transparent flex items-center justify-between transition-all group">
+                        AUDIO
+                        <span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-50">chevron_right</span>
+                    </button>
+                    <button class="w-full text-left px-4 py-4 font-headline font-bold text-on-surface-variant hover:bg-surface-container-high border-l-4 border-transparent flex items-center justify-between transition-all group">
+                        GAMEPLAY
+                        <span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-50">chevron_right</span>
+                    </button>
+                    <button class="w-full text-left px-4 py-4 font-headline font-bold text-on-surface-variant hover:bg-surface-container-high border-l-4 border-transparent flex items-center justify-between transition-all group">
+                        EDITION
+                        <span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-50">chevron_right</span>
+                    </button>
+                </aside>
+
+                <!-- Settings Panel -->
+                <section class="col-span-12 md:col-span-9 space-y-12">
+                    <!-- Language -->
+                    <div class="space-y-4">
+                        <label class="font-headline text-xs font-bold text-on-surface-variant tracking-[0.2em] uppercase">Sector_01: Language_Protocol</label>
+                        <div class="flex gap-2">
+                            <button class="px-8 py-3 bg-primary-container text-on-primary-container font-headline font-bold uppercase tracking-wider border-t-2 border-primary transition-all">TR</button>
+                            <button class="px-8 py-3 bg-surface-container-high text-on-surface-variant font-headline font-bold uppercase tracking-wider hover:bg-surface-bright transition-all">EN</button>
+                        </div>
+                    </div>
+
+                    <!-- Theme -->
+                    <div class="space-y-4">
+                        <label class="font-headline text-xs font-bold text-on-surface-variant tracking-[0.2em] uppercase">Sector_02: UI_Atmospheric_Tuning</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="group cursor-pointer bg-surface-container-low border border-outline-variant/15 p-1 transition-all hover:border-primary">
+                                <div class="aspect-video bg-surface relative overflow-hidden mb-3">
+                                    <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent"></div>
+                                    <div class="absolute bottom-2 left-2 flex gap-1">
+                                        <div class="w-8 h-2 bg-primary"></div>
+                                        <div class="w-4 h-2 bg-secondary"></div>
+                                    </div>
+                                </div>
+                                <div class="px-3 pb-3 flex items-center justify-between">
+                                    <span class="font-headline text-sm font-bold text-primary">Neon Surge</span>
+                                    <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">radio_button_checked</span>
+                                </div>
+                            </div>
+                            <div class="group cursor-pointer bg-surface-container-low border border-outline-variant/15 p-1 transition-all hover:border-on-surface">
+                                <div class="aspect-video bg-surface-container-high relative overflow-hidden mb-3">
+                                    <div class="absolute inset-0 bg-gradient-to-br from-on-surface/5 to-transparent"></div>
+                                    <div class="absolute top-2 right-2 w-3 h-3 border border-on-surface/30"></div>
+                                </div>
+                                <div class="px-3 pb-3 flex items-center justify-between">
+                                    <span class="font-headline text-sm font-bold text-on-surface-variant">Minimal Ops</span>
+                                    <span class="material-symbols-outlined text-on-surface-variant text-sm">radio_button_unchecked</span>
+                                </div>
+                            </div>
+                            <div class="group cursor-pointer bg-surface-container-low border border-outline-variant/15 p-1 transition-all hover:border-error">
+                                <div class="aspect-video bg-black relative overflow-hidden mb-3">
+                                    <div class="absolute inset-0 bg-gradient-to-br from-error/10 to-transparent"></div>
+                                    <div class="absolute inset-0 flex items-center justify-center opacity-20">
+                                        <div class="w-full h-[1px] bg-error"></div>
+                                    </div>
+                                </div>
+                                <div class="px-3 pb-3 flex items-center justify-between">
+                                    <span class="font-headline text-sm font-bold text-on-surface-variant">Deep Void</span>
+                                    <span class="material-symbols-outlined text-on-surface-variant text-sm">radio_button_unchecked</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Font Size -->
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-end">
+                            <label class="font-headline text-xs font-bold text-on-surface-variant tracking-[0.2em] uppercase">Sector_03: Data_Legibility_Scaling</label>
+                            <span class="font-mono text-primary text-xl font-bold">100%</span>
+                        </div>
+                        <input type="range" min="80" max="150" value="100" class="w-full accent-primary cursor-pointer" />
+                    </div>
+
+                    <!-- Edition Info -->
+                    <div class="p-6 border border-outline-variant/20 bg-surface-container/50 space-y-4">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-secondary">verified</span>
+                            <span class="font-headline font-bold text-lg text-on-surface">Edition Info</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 font-mono text-xs">
+                            <div><span class="text-on-surface-variant">Current:</span> <span class="text-secondary">Community (Free)</span></div>
+                            <div><span class="text-on-surface-variant">Version:</span> <span class="text-primary">v0.1.0-alpha</span></div>
+                            <div><span class="text-on-surface-variant">Scenarios:</span> <span class="text-on-surface">2 / ∞ (Enterprise)</span></div>
+                            <div><span class="text-on-surface-variant">AI Engine:</span> <span class="text-on-surface-variant/50">Not Connected</span></div>
+                        </div>
+                        <button class="w-full mt-2 py-3 border border-tertiary/30 text-tertiary font-headline font-bold text-sm tracking-widest uppercase hover:bg-tertiary/5 transition-all">UPGRADE TO ENTERPRISE →</button>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="pt-8 border-t border-outline-variant/15 flex justify-end gap-4">
+                        <button onclick="navigateTo('menu')" class="px-6 py-2 font-headline font-bold text-on-surface-variant hover:text-on-surface transition-colors">REVERT_CHANGES</button>
+                        <button onclick="navigateTo('menu')" class="px-10 py-3 bg-primary-container text-on-primary-container font-headline font-bold uppercase tracking-wider border-t-2 border-primary transition-all hover:brightness-110">DEPLOY_CONFIG</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/scenarios.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
