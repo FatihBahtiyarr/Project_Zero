@@ -17,10 +17,11 @@ function startScenario(scenarioId) {
 }
 
 function confirmExit() {
+    console.log("confirmExit called, gameActive:", gameEngine.gameActive);
     if (gameEngine.gameActive) {
         if (confirm("⚠️ Active incident in progress! Are you sure you want to abort the mission?")) {
             gameEngine.gameActive = false;
-            clearInterval(gameEngine.timerInterval);
+            if (gameEngine.timerInterval) clearInterval(gameEngine.timerInterval);
             navigateTo("menu");
         }
     } else {
@@ -40,7 +41,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     document.getElementById("screen-game")?.addEventListener("click", (e) => {
-        if (e.target.tagName !== "BUTTON" && e.target.tagName !== "A") input?.focus();
+        // Only focus terminal if clicking background, not buttons or interactive elements
+        const isInteractive = e.target.closest("button") || e.target.closest("a") || e.target.closest("input");
+        if (!isInteractive) input?.focus();
     });
 
     navigateTo("menu");
